@@ -20,8 +20,10 @@ def augment(productions):
 	productions.insert(0, 'X->S')
 
 def append_dot(productions):
-	for production in productions:
-		production.replace('->', '->.')
+	i = 0
+	while i < len(productions):
+		productions[i] = productions[i].replace('->', '->.')
+		i += 1
 
 def find_closure(item):
 	c = [item]
@@ -59,6 +61,10 @@ productions = ['S->AA', 'A->aA', 'A->b']
 print('Grammar:')
 print(productions)
 
+augment(productions)
+print('\nAugmented Grammar:')
+print(productions)
+
 terminals = get_terminals(productions)
 non_terminals = get_non_terminals(productions)
 symbols = terminals + non_terminals
@@ -68,11 +74,8 @@ print(terminals)
 print(non_terminals)
 print(symbols)
 
-augment(productions)
-print('\nAugmented Grammar:')
-print(productions)
-
 append_dot(productions)
+print(productions)
 
 # states = [[1, productions]]
 # find_next_states(states)
