@@ -39,12 +39,12 @@ def find_closure(items, G):
 	
 	return closure
 
-def find_canonical_items(G, symbols, start_symbol):
-	canonical_items = []
+def find_itemsets(G, symbols, start_symbol):
+	itemsets = []
 	state_transitions = []
-	canonical_items.append(find_closure([['X', '.' + str(start_symbol) + '$']], G))
+	itemsets.append(find_closure([['X', '.' + str(start_symbol) + '$']], G))
 
-	for itemset in canonical_items:
+	for itemset in itemsets:
 		for symbol in symbols:
 			if (symbol == '$'):
 				continue
@@ -71,26 +71,26 @@ def find_canonical_items(G, symbols, start_symbol):
 			else:
 				shift = True
 			
-			if (new_state not in canonical_items):
+			if (new_state not in itemsets):
 				if (goto):
-					state_transitions.append(['GOTO',canonical_items.index(itemset)+1,len(canonical_items)+1,symbol])
+					state_transitions.append(['GOTO',itemsets.index(itemset)+1,len(itemsets)+1,symbol])
 				
 				elif (shift):
-					state_transitions.append(['SHIFT',canonical_items.index(itemset)+1,len(canonical_items)+1,symbol])
+					state_transitions.append(['SHIFT',itemsets.index(itemset)+1,len(itemsets)+1,symbol])
 				
-				canonical_items.append(new_state)
+				itemsets.append(new_state)
 
 			else:
 				if (goto):
-					state_transitions.append(['GOTO', canonical_items.index(itemset)+1, canonical_items.index(new_state)+1, symbol])
+					state_transitions.append(['GOTO', itemsets.index(itemset)+1, itemsets.index(new_state)+1, symbol])
 				elif (shift):
-					state_transitions.append(['SHIFT', canonical_items.index(itemset)+1, canonical_items.index(new_state)+1, symbol])
+					state_transitions.append(['SHIFT', itemsets.index(itemset)+1, itemsets.index(new_state)+1, symbol])
 
-	return canonical_items, state_transitions
+	return itemsets, state_transitions
 
-def make_reductions(canonical_items, G, start_symbol):
+def make_reductions(itemsets, G, start_symbol):
 	accept_state = -1
-	reductions = [ [] for i in range(len(canonical_items)) ]
+	reductions = [ [] for i in range(len(itemsets)) ]
 	final_item = ['X', str(start_symbol)+'.$']
 	final_rules = []
 
@@ -99,13 +99,13 @@ def make_reductions(canonical_items, G, start_symbol):
 		for rhs in G[lhs]:
 			final_rules.append([lhs, rhs + str('.')])
 
-	for itemset in canonical_items:
+	for itemset in itemsets:
 		if (final_item in itemset):
-			accept_state = canonical_items.index(itemset)+1
+			accept_state = itemsets.index(itemset)+1
 
 		for item in itemset:
 			if (item in final_rules):
-				reductions[canonical_items.index(itemset)].append(final_rules.index(item))
+				reductions[itemsets.index(itemset)].append(final_rules.index(item))
 
 	return accept_state, reductions
 
@@ -113,7 +113,7 @@ def createParseTable(state_transitions, reductions, terminals, non_terminals):
 	i = 0
 	symbols = terminals + non_terminals
 	symbolMap = dict()
-	parseTable = [ ['-' for i in range(len(symbols))] for j in range(len(canonical_items)) ]
+	parseTable = [ ['-' for i in range(len(symbols))] for j in range(len(itemsets)) ]
 
 	for symbol in symbols:
 		symbolMap[symbol] = i
@@ -193,16 +193,16 @@ for production in productions:
 	rhs = production.split('->')[1].split('|')
 	G[lhs] = rhs
 
-canonical_items, state_transitions = find_canonical_items(G, symbols, start_symbol)
+itemsets, state_transitions = find_itemsets(G, symbols, start_symbol)
 
-print('\nCanonical Items:')
-for line_no, line in enumerate(canonical_items):
+print('\nItemsets:')
+for line_no, line in enumerate(itemsets):
 	print(str(line_no+1) + '\t', line)
 
 print('\nState Transitions:')
 for line_no, line in enumerate(state_transitions):
 	print(str(line_no+1) + '\t', line)
 
-accept_state, reductions = make_reductions(canonical_items, G, start_symbol)
+accept_state, reductions = make_reductions(itemsets, G, start_symbol)
 
 printTable()
