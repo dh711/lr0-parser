@@ -16,73 +16,95 @@ def get_non_terminals(productions):
 
 	return non_terminals
 
-def augment(productions):
-	productions.insert(0, 'X->S')
+def find_closure(items, G):
+	closure = items
+	
+	for item in closure:
+		dot_pos = item[1].index('.')
 
-def append_dot(productions):
-	i = 0
-	while i < len(productions):
-		productions[i] = productions[i].replace('->', '->.')
-		i += 1
+		if (dot_pos < (len(item[1]) - 1) and item[1][dot_pos+1] in G):
+			nT_next_to_dot = item[1][dot_pos+1]
+			
+			for production in G[nT_next_to_dot]:
+				possible_item = [nT_next_to_dot, str('.') + str(production)]
+				
+				if (possible_item not in closure):
+					closure.append(possible_item)
+	
+	return closure
 
-def find_closure(item):
-	c = [item]
-	for item in c:
-		dot_pos = item.index('.')
-		if dot_pos != len(item)-1:
-			target = dot_pos + 1
-			for production in productions:
-				if production[0] == item[target] and append_dot(production) not in c:
-					c.append(append_dot(production))
+def find_canonical_items(G, symbols):
+	canonical_items = []
+	state_transitions = []
+	canonical_items.append(find_closure([['X', '.S$']], G))
 
-	return c
+	for itemset in canonical_items:
+		for symbol in symbols:
+			if (symbol == '$'):
+				continue
+			
+			goto = False
+			shift = False
+			
+			intermediate = []
+			
+			for item in itemset:
+				dot_pos = item[1].index('.')
+				
+				if(dot_pos < (len(item[1]) - 1) and item[1][dot_pos + 1] == symbol):
+					intermediate.append([item[0], item[1][:dot_pos]+symbol + '.' + item[1][dot_pos+2:]])
+				
+			new_state = find_closure(intermediate, G)
+			
+			if(len(new_state) == 0):
+				continue
+			
+			if(symbol in G.keys()):
+				goto = True
+			
+			else:
+				shift = True
+			
+			if (new_state not in canonical_items):
+				if (goto):
+					state_transitions.append(['g',canonical_items.index(itemset)+1,len(canonical_items)+1,symbol])
+				
+				elif (shift):
+					state_transitions.append(['s',canonical_items.index(itemset)+1,len(canonical_items)+1,symbol])
+				
+				canonical_items.append(new_state)
 
-def goto(item):
-	temp = []
-	dot_pos = item.index('.')
-	if dot_pos < len(item)-1:
-		new_item = item[0:dot_pos] + item[dot_pos+1] + '.' + item[dot_pos+2:]
-		if new_item.index('.') == len(new_item) - 1:
-			temp.append(new_item)
-			return temp
-		else:
-			c = find_closure(new_item)
-			return c
-	else:
-		return item
+			else:
+				if (goto):
+					state_transitions.append(['g', canonical_items.index(itemset)+1, canonical_items.index(new_state)+1, symbol])
+				elif (shift):
+					state_transitions.append(['s', canonical_items.index(itemset)+1, canonical_items.index(new_state)+1, symbol])
 
-def find_next_states(states, symbols):
-	pass
+	return canonical_items, state_transitions
 
-# def generate_table(states)
-
-productions = ['S->AA', 'A->aA', 'A->b']
+productions = ['S->AA', 'A->aA|b']
 
 print('Grammar:')
-print(productions)
-
-augment(productions)
-print('\nAugmented Grammar:')
 print(productions)
 
 terminals = get_terminals(productions)
 non_terminals = get_non_terminals(productions)
 symbols = terminals + non_terminals
-
 print('\nTerminals & Non-Terminals:')
 print(terminals)
 print(non_terminals)
 print(symbols)
 
-append_dot(productions)
-print(productions)
+G = dict()
+terminals += '$'
 
-# states = [[1, productions]]
-# find_next_states(states)
-# print('\nStates:')
-# print(states)
+for production in productions:
+	lhs = production.split('->')[0]
+	rhs = production.split('->')[1].split('|')
+	G[lhs] = rhs
 
+canonical_items, state_transitions = find_canonical_items(G, symbols)
 
-# table = generate_table(states)
+print(canonical_items)
 
-# Print table.
+print(state_transitions)
