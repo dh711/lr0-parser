@@ -17,7 +17,7 @@ def get_terminals(productions, non_terminals):
 	for production in productions:
 		temp = production.split('->')[1]
 		for char in temp:
-			if char not in non_terminals and char not in non_terminals and char != '|':
+			if char not in non_terminals and char not in terminals and char != '|':
 				terminals.append(char) 
 
 	return terminals
@@ -206,3 +206,6 @@ for line_no, line in enumerate(state_transitions):
 accept_state, reductions = make_reductions(itemsets, G, start_symbol)
 
 print_table()
+
+print(terminals)
+print(non_terminals)
