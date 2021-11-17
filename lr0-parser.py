@@ -109,7 +109,7 @@ def make_reductions(itemsets, G, start_symbol):
 
 	return accept_state, reductions
 
-def createParseTable(state_transitions, reductions, terminals, non_terminals):
+def create_parse_table(state_transitions, reductions, terminals, non_terminals):
 	i = 0
 	symbols = terminals + non_terminals
 	symbolMap = dict()
@@ -134,8 +134,8 @@ def createParseTable(state_transitions, reductions, terminals, non_terminals):
 
 	return parseTable
 
-def printTable():
-	parseTable = createParseTable(state_transitions, reductions, terminals, non_terminals)
+def print_table():
+	parseTable = create_parse_table(state_transitions, reductions, terminals, non_terminals)
 
 	table = []
 
@@ -205,4 +205,4 @@ for line_no, line in enumerate(state_transitions):
 
 accept_state, reductions = make_reductions(itemsets, G, start_symbol)
 
-printTable()
+print_table()
