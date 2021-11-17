@@ -164,7 +164,7 @@ start_symbol = ''
 
 
 try:
-	with open('./' + sys.argv[1], 'r') as file:
+	with open('./input/' + sys.argv[1], 'r') as file:
 		for line in file.readlines():
 			if (len(line) == 2):
 				start_symbol = line[0]
