@@ -1,3 +1,4 @@
+import sys
 import termtables as tt
 
 def get_non_terminals(productions):
@@ -156,10 +157,25 @@ def printTable():
 	print(final_table)
 	print("\n")
 
-productions = ['E->E+T|T', 'T->T*F|F', 'F->(E)|e']
-start_symbol = 'E'
+productions = []
+start_symbol = ''
 
-print('Grammar:')
+# Reading grammar from file.
+
+
+try:
+	with open('./' + sys.argv[1], 'r') as file:
+		for line in file.readlines():
+			if (len(line) == 2):
+				start_symbol = line[0]
+				continue
+			productions.append(line.strip().replace('\n', ''))
+
+except FileNotFoundError:
+	print('\n' + sys.argv[1] + ' does not exist!\n')
+	exit()
+
+print('\nGrammar:')
 print(productions)
 
 non_terminals = get_non_terminals(productions)
